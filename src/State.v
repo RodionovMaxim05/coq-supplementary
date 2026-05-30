@@ -117,12 +117,24 @@ Section S.
   Qed.
 
   Lemma state_extensional_equivalence (st st' : state) (H: forall x z, st / x => z <-> st' / x => z) : st = st'.
+  Proof. Abort.
+
+  Lemma state_extensional_equivalence_false :
+  (exists _ : A, True) ->
+  ~ forall (st st' : state), (forall x z, st / x => z <-> st' / x => z) -> st = st'.
   Proof.
-    (* counterexample:
-       st  = [(x, 1); (x, 2)]
-       st' = [(x, 1)]
-    *)
-  Abort.
+    intros [a _] Hfalse.
+    pose (st1 := cons (Id 0, a) (cons (Id 0, a) nil)).
+    pose (st2 := cons (Id 0, a) nil).
+    assert (Heq : st1 = st2).
+    - apply (Hfalse st1 st2).
+      intros. split; intro; inversion H; subst.
+        + apply st_binds_hd.
+        + inversion H6; subst; auto.
+        + apply st_binds_hd.
+        + inversion H6.
+    - discriminate Heq.
+  Qed.
 
   Definition state_equivalence (st st' : state) := forall x a, st / x => a <-> st' / x => a.
 
